@@ -1,0 +1,4 @@
+.debtCalculator{
+      display: flex;
+      flex-direction: column;
+}
