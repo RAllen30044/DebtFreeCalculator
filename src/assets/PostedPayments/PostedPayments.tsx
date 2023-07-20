@@ -13,12 +13,13 @@ export const PostedPayments = ({
           return (
             <li key={posting.date}>
               <p>Date: {posting.currentDate}</p>
-              <p>Payment: {posting.payment}</p>
-              <p>Remaning Balance: {posting.balance}</p>
+              <p>Payment: {Math.round(posting.payment*100)/100}</p>
+              <p>Remaning Balance: {Math.round((posting.balance-posting.payment)*100)/100}</p>
             </li>
           );
         })}
       </ul>
+ 
     </>
   );
 };

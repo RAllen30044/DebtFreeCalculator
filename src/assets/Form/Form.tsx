@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TextInputProps } from "../TextInputProps";
 import { PaymentHistory } from "../paymentHistory/PaymentHistory";
+import { ErrorMessage } from "./ErrorMessage";
 
 const preventLetterTyping = (value: string) => {
   return value.replace(/[^0-9.]/g, "");
@@ -16,6 +17,8 @@ export const Form = () => {
   const [termInYears, setTermInYears] = useState<string>("");
   const [payment, setPayment] = useState<number>(0);
   const [newBalance, setNewBalance] = useState<number>(0);
+  const [isAnError, setIsAnError] = useState(false);
+const [isSubmitted, setIsSubmitted]=useState(false)
 
   const debt = debtInput ? parseInt(debtInput) : 0;
   const interestPercentage = interestPercentageInput
@@ -25,30 +28,50 @@ export const Form = () => {
     ? parseFloat(principlePercentageInput)
     : 0;
 
-  const interest = debt * (interestPercentage / 10000) * parseInt(termInMonths);
+
+  const months = termInMonths ? parseInt(termInMonths) : 0;
+  const years = termInYears ? parseInt(termInYears) : 0;
+  const interest = termInMonths
+    ? debt * (interestPercentage / 10000) * months
+    : debt * (interestPercentage / 10000) * (years * 12);
   const principle = debt * (principlePercentage / 100);
-  const myPayment = (interest + principle + debt) / parseInt(termInMonths);
-  const myBalance = debt + interest - principle;
+  const myPayment = termInMonths
+    ? (interest + principle + debt) / months
+    : (interest + principle + debt) / (years * 12);
+  const myBalance = debt + interest;
+
+
+  const isMonthOrYearInputValid = (month: number, year: number) => {
+    return (month === 0 && year === 0) || (month > 1 && year > 1);
+  };
+
   const handleAnswer: (payment: number, balance: number) => void = (
     payment: number,
     balance: number
   ) => {
-
     if (newBalance <= payment) {
-      const lastPayment = newBalance;
-      setPayment(lastPayment)
-      setNewBalance(newBalance - lastPayment);
+      const finalBalance = newBalance - newBalance;
+      setPayment(finalBalance);
+      setNewBalance(finalBalance);
       return;
     }
     setNewBalance(balance - payment);
+    if (balance - payment < payment) setPayment(balance - payment);
   };
+
   return (
     <>
       <form
         className="debtCalculator"
         onSubmit={(e) => {
           e.preventDefault();
-
+          if (isMonthOrYearInputValid(months, years)) {
+            setIsAnError(true);
+            setIsSubmitted(false);
+            return;
+          }
+          setIsSubmitted(true)
+          setIsAnError(false);
           setInterestPercentageInput("");
           setPrinciplePercentageInput("");
           setTermInMonths("");
@@ -109,6 +132,10 @@ export const Form = () => {
             }}
           />
         </div>
+
+        <label htmlFor="Or">Or</label>
+
+        <br />
         <div>
           <TextInputProps
             label={"Term in Years"}
@@ -122,15 +149,16 @@ export const Form = () => {
             }}
           />
         </div>
+        {isAnError&& <ErrorMessage />}
 
         <input type="submit" />
       </form>
-      <PaymentHistory
+{   isSubmitted &&   <PaymentHistory
         debt={debt}
         payment={payment}
         balance={newBalance}
         handleAnswer={handleAnswer}
-      />
+      />}
     </>
   );
 };
