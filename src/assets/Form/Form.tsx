@@ -18,7 +18,7 @@ export const Form = () => {
   const [payment, setPayment] = useState<number>(0);
   const [newBalance, setNewBalance] = useState<number>(0);
   const [isAnError, setIsAnError] = useState(false);
-const [isSubmitted, setIsSubmitted]=useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const debt = debtInput ? parseInt(debtInput) : 0;
   const interestPercentage = interestPercentageInput
@@ -27,7 +27,6 @@ const [isSubmitted, setIsSubmitted]=useState(false)
   const principlePercentage = principlePercentageInput
     ? parseFloat(principlePercentageInput)
     : 0;
-
 
   const months = termInMonths ? parseInt(termInMonths) : 0;
   const years = termInYears ? parseInt(termInYears) : 0;
@@ -40,7 +39,6 @@ const [isSubmitted, setIsSubmitted]=useState(false)
     : (interest + principle + debt) / (years * 12);
   const myBalance = debt + interest;
 
-
   const isMonthOrYearInputValid = (month: number, year: number) => {
     return (month === 0 && year === 0) || (month > 1 && year > 1);
   };
@@ -49,16 +47,31 @@ const [isSubmitted, setIsSubmitted]=useState(false)
     payment: number,
     balance: number
   ) => {
+    console.log(payment);
+
     if (newBalance <= payment) {
       const finalBalance = newBalance - newBalance;
       setPayment(finalBalance);
       setNewBalance(finalBalance);
       return;
     }
+    setPayment(payment);
     setNewBalance(balance - payment);
-    if (balance - payment < payment) setPayment(balance - payment);
+    if (balance - payment < payment) {
+      setPayment(balance - payment);
+    }
   };
-
+  const handleReset: (bool: boolean) => void = (bool: boolean) => {
+    //sole reset function
+    setIsSubmitted(bool);
+    setDebtInput("");
+    setInterestPercentageInput("");
+    setNewBalance(0);
+    setPayment(0);
+    setPrinciplePercentageInput("");
+    setTermInMonths("");
+    setTermInYears("");
+  };
   return (
     <>
       <form
@@ -70,7 +83,7 @@ const [isSubmitted, setIsSubmitted]=useState(false)
             setIsSubmitted(false);
             return;
           }
-          setIsSubmitted(true)
+          setIsSubmitted(true);
           setIsAnError(false);
           setInterestPercentageInput("");
           setPrinciplePercentageInput("");
@@ -149,16 +162,18 @@ const [isSubmitted, setIsSubmitted]=useState(false)
             }}
           />
         </div>
-        {isAnError&& <ErrorMessage />}
+        {isAnError && <ErrorMessage />}
 
         <input type="submit" />
       </form>
-{   isSubmitted &&   <PaymentHistory
-        debt={debt}
-        payment={payment}
-        balance={newBalance}
-        handleAnswer={handleAnswer}
-      />}
+      {isSubmitted && (
+        <PaymentHistory
+          payment={payment}
+          balance={newBalance}
+          handleAnswer={handleAnswer}
+          handleReset={handleReset}
+        />
+      )}
     </>
   );
 };

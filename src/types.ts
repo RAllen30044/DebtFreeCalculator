@@ -22,7 +22,8 @@ export type TSGetDebt = {
 
 export type TSHandleDebt = {
   handleAnswer: (payment: number, balance: number) => void;
-  debt: number;
+  handleReset: (bool: boolean) => void;
+
   payment: number;
   balance: number;
 };

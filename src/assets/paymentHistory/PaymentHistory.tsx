@@ -1,15 +1,17 @@
 import { PaymentPostings, TSHandleDebt } from "../../types";
 import { useState } from "react";
 import { PostedPayments } from "../PostedPayments/PostedPayments";
+import { TextInputProps } from "../TextInputProps";
 
 export const PaymentHistory = ({
-  debt,
   payment,
   balance,
   handleAnswer,
+  handleReset,
 }: TSHandleDebt) => {
   const [paymentPostings, setPaymentPostings] = useState<PaymentPostings[]>([]);
-
+  const [paymentInput, setPaymentInput] = useState<string>("");
+  const myPayment = parseInt(paymentInput);
   return (
     <>
       <div className="PaymentHistory">
@@ -18,7 +20,9 @@ export const PaymentHistory = ({
           className="payments"
           onSubmit={(e) => {
             e.preventDefault();
-            handleAnswer(payment, balance);
+            const toBePaid = myPayment > payment ? myPayment : payment;
+            console.log(toBePaid);
+            handleAnswer(toBePaid, balance);
             const newPosting = {
               date: Date.now(),
               currentDate: new Date().toLocaleDateString("en-US"),
@@ -27,15 +31,27 @@ export const PaymentHistory = ({
             };
             setPaymentPostings([newPosting, ...paymentPostings]);
           }}
+          onReset={(e) => {
+            e.preventDefault();
+            handleReset(false);
+          }}
         >
           <div>
-            <label>Initial Debt: </label>
-            <h3>${debt}</h3>
+            <TextInputProps
+              label="Enter your payment amount"
+              inputProps={{
+                type: "text",
+                onChange: ({ target: { value } }) => {
+                  setPaymentInput(value);
+                },
+              }}
+            />
           </div>
 
           <div>
             <label>Payment: </label>
-            <h3>${Math.round(payment * 100) / 100}</h3>
+
+            <h3>{Math.round(payment * 100) / 100}</h3>
           </div>
           <div>
             <label>Balance left on Debt </label>
@@ -51,19 +67,11 @@ export const PaymentHistory = ({
                 repayment history?
               </label>
               <br />
-              <label>
-                (selecting Pay will not allow you to restart unless you resubmit
-                a new form)
-              </label>
+              <label>Click Resart to start a new form</label>
               <br />
-              {paymentPostings.length === 0 ? (
-                <div>
-                  <button type="submit">Pay</button>
-                  <button type="reset">Restart</button>
-                </div>
-              ) : (
-                <button type="submit">Pay</button>
-              )}
+
+              <button type="submit">Pay</button>
+              <button type="reset">Restart</button>
             </div>
           )}
         </form>
